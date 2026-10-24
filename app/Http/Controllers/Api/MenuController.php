@@ -10,20 +10,25 @@ use Illuminate\Support\Facades\Validator;
 
 class MenuController extends Controller
 {
+    /**
+     * Menampilkan semua data menu
+     */
     public function index()
     {
         $menus = Menu::all();
         return new PostResource(true, 'List Data Menu', $menus);
     }
 
+    /**
+     * Menyimpan data menu baru
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama_menu'   => 'required|string|max:255',
-            'deskripsi'   => 'nullable|string',
-            'harga'       => 'required|numeric',
-            'kategori'    => 'required|string',
-            'stok'        => 'nullable|integer',
+            'nama_menu' => 'required|string',
+            'harga'     => 'required|numeric',
+            'kategori'  => 'required|string',
+            'deskripsi' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -39,7 +44,10 @@ class MenuController extends Controller
         return new PostResource(true, 'Data Menu Berhasil Disimpan', $menu);
     }
 
-    public function show($id)
+    /**
+     * Menampilkan detail menu berdasarkan ID
+     */
+    public function show(int $id)
     {
         $menu = Menu::find($id);
 
@@ -54,7 +62,10 @@ class MenuController extends Controller
         return new PostResource(true, 'Detail Data Menu', $menu);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Mengubah data menu
+     */
+    public function update(Request $request, int $id)
     {
         $menu = Menu::find($id);
 
@@ -66,12 +77,30 @@ class MenuController extends Controller
             ], 404);
         }
 
+        $validator = Validator::make($request->all(), [
+            'nama_menu' => 'required|string',
+            'harga'     => 'required|numeric',
+            'kategori'  => 'required|string',
+            'deskripsi' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi Gagal',
+                'data'    => $validator->errors()
+            ], 422);
+        }
+
         $menu->update($request->all());
 
         return new PostResource(true, 'Data Menu Berhasil Diubah', $menu);
     }
 
-    public function destroy($id)
+    /**
+     * Menghapus data menu
+     */
+    public function destroy(int $id)
     {
         $menu = Menu::find($id);
 

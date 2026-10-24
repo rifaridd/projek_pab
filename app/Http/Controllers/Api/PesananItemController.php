@@ -10,12 +10,18 @@ use Illuminate\Support\Facades\Validator;
 
 class PesananItemController extends Controller
 {
+    /**
+     * Menampilkan semua data pesanan item
+     */
     public function index()
     {
-        $items = PesananItem::all();
-        return new PostResource(true, 'List Data Item Pesanan', $items);
+        $pesananItems = PesananItem::all();
+        return new PostResource(true, 'List Data Pesanan Item', $pesananItems);
     }
 
+    /**
+     * Menyimpan data pesanan item baru
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -33,57 +39,81 @@ class PesananItemController extends Controller
             ], 422);
         }
 
-        $item = PesananItem::create($request->all());
+        $pesananItem = PesananItem::create($request->all());
 
-        return new PostResource(true, 'Item Pesanan Berhasil Disimpan', $item);
+        return new PostResource(true, 'Data Pesanan Item Berhasil Disimpan', $pesananItem);
     }
 
-    public function show($id)
+    /**
+     * Menampilkan detail pesanan item berdasarkan ID
+     */
+    public function show(int $id)
     {
-        $item = PesananItem::find($id);
+        $pesananItem = PesananItem::find($id);
 
-        if (!$item) {
+        if (!$pesananItem) {
             return response()->json([
                 'success' => false,
-                'message' => 'Item Pesanan Tidak Ditemukan',
+                'message' => 'Data Pesanan Item Tidak Ditemukan',
                 'data'    => null
             ], 404);
         }
 
-        return new PostResource(true, 'Detail Item Pesanan', $item);
+        return new PostResource(true, 'Detail Data Pesanan Item', $pesananItem);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Mengubah data pesanan item
+     */
+    public function update(Request $request, int $id)
     {
-        $item = PesananItem::find($id);
+        $pesananItem = PesananItem::find($id);
 
-        if (!$item) {
+        if (!$pesananItem) {
             return response()->json([
                 'success' => false,
-                'message' => 'Item Pesanan Tidak Ditemukan',
+                'message' => 'Data Pesanan Item Tidak Ditemukan',
                 'data'    => null
             ], 404);
         }
 
-        $item->update($request->all());
+        $validator = Validator::make($request->all(), [
+            'pesanan_id' => 'required|integer',
+            'menu_id'    => 'required|integer',
+            'jumlah'     => 'required|integer',
+            'subtotal'   => 'required|numeric',
+        ]);
 
-        return new PostResource(true, 'Item Pesanan Berhasil Diubah', $item);
-    }
-
-    public function destroy($id)
-    {
-        $item = PesananItem::find($id);
-
-        if (!$item) {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Item Pesanan Tidak Ditemukan',
+                'message' => 'Validasi Gagal',
+                'data'    => $validator->errors()
+            ], 422);
+        }
+
+        $pesananItem->update($request->all());
+
+        return new PostResource(true, 'Data Pesanan Item Berhasil Diubah', $pesananItem);
+    }
+
+    /**
+     * Menghapus data pesanan item
+     */
+    public function destroy(int $id)
+    {
+        $pesananItem = PesananItem::find($id);
+
+        if (!$pesananItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data Pesanan Item Tidak Ditemukan',
                 'data'    => null
             ], 404);
         }
 
-        $item->delete();
+        $pesananItem->delete();
 
-        return new PostResource(true, 'Item Pesanan Berhasil Dihapus', null);
+        return new PostResource(true, 'Data Pesanan Item Berhasil Dihapus', null);
     }
 }

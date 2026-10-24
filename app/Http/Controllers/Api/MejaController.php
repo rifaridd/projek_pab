@@ -46,7 +46,7 @@ class MejaController extends Controller
     /**
      * Menampilkan detail meja berdasarkan ID
      */
-    public function show($id)
+    public function show(int $id)
     {
         $meja = Meja::find($id);
 
@@ -64,7 +64,7 @@ class MejaController extends Controller
     /**
      * Mengubah data meja
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $meja = Meja::find($id);
 
@@ -76,6 +76,20 @@ class MejaController extends Controller
             ], 404);
         }
 
+        $validator = Validator::make($request->all(), [
+            'nomor_meja' => 'required|string',
+            'kapasitas'  => 'required|integer',
+            'status'     => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi Gagal',
+                'data'    => $validator->errors()
+            ], 422);
+        }
+
         $meja->update($request->all());
 
         return new PostResource(true, 'Data Meja Berhasil Diubah', $meja);
@@ -84,7 +98,7 @@ class MejaController extends Controller
     /**
      * Menghapus data meja
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $meja = Meja::find($id);
 

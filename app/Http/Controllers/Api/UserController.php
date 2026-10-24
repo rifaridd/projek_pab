@@ -39,7 +39,6 @@ class UserController extends Controller
             ], 422);
         }
 
-        // Simpan data dengan password yang di-hash
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
@@ -52,7 +51,7 @@ class UserController extends Controller
     /**
      * Menampilkan detail user berdasarkan ID
      */
-    public function show($id)
+    public function show(int $id)
     {
         $user = User::find($id);
 
@@ -70,7 +69,7 @@ class UserController extends Controller
     /**
      * Mengubah data user
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $user = User::find($id);
 
@@ -101,7 +100,6 @@ class UserController extends Controller
             'email' => $request->email ?? $user->email,
         ];
 
-        // Jika password diisi, update passwordnya
         if ($request->filled('password')) {
             $updateData['password'] = Hash::make($request->password);
         }
@@ -114,7 +112,7 @@ class UserController extends Controller
     /**
      * Menghapus data user
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $user = User::find($id);
 

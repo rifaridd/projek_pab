@@ -10,20 +10,24 @@ use Illuminate\Support\Facades\Validator;
 
 class PesananController extends Controller
 {
+    /**
+     * Menampilkan semua data pesanan
+     */
     public function index()
     {
-        // Mengambil data pesanan beserta relasi itemnya (jika relasi sudah dibuat di model)
         $pesanans = Pesanan::all();
         return new PostResource(true, 'List Data Pesanan', $pesanans);
     }
 
+    /**
+     * Menyimpan data pesanan baru
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id'       => 'required|integer',
-            'meja_id'       => 'required|integer',
-            'total_harga'   => 'required|numeric',
-            'status_pesanan'=> 'required|string',
+            'user_id'     => 'required|integer',
+            'total_harga' => 'required|numeric',
+            'status'      => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -39,7 +43,10 @@ class PesananController extends Controller
         return new PostResource(true, 'Data Pesanan Berhasil Disimpan', $pesanan);
     }
 
-    public function show($id)
+    /**
+     * Menampilkan detail pesanan berdasarkan ID
+     */
+    public function show(int $id)
     {
         $pesanan = Pesanan::find($id);
 
@@ -54,7 +61,10 @@ class PesananController extends Controller
         return new PostResource(true, 'Detail Data Pesanan', $pesanan);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Mengubah data pesanan
+     */
+    public function update(Request $request, int $id)
     {
         $pesanan = Pesanan::find($id);
 
@@ -66,12 +76,29 @@ class PesananController extends Controller
             ], 404);
         }
 
+        $validator = Validator::make($request->all(), [
+            'user_id'     => 'required|integer',
+            'total_harga' => 'required|numeric',
+            'status'      => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi Gagal',
+                'data'    => $validator->errors()
+            ], 422);
+        }
+
         $pesanan->update($request->all());
 
         return new PostResource(true, 'Data Pesanan Berhasil Diubah', $pesanan);
     }
 
-    public function destroy($id)
+    /**
+     * Menghapus data pesanan
+     */
+    public function destroy(int $id)
     {
         $pesanan = Pesanan::find($id);
 

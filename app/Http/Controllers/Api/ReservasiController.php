@@ -51,7 +51,7 @@ class ReservasiController extends Controller
     /**
      * Menampilkan detail reservasi berdasarkan ID
      */
-    public function show($id)
+    public function show(int $id)
     {
         $reservasi = Reservasi::find($id);
 
@@ -69,7 +69,7 @@ class ReservasiController extends Controller
     /**
      * Mengubah data reservasi
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $reservasi = Reservasi::find($id);
 
@@ -81,6 +81,25 @@ class ReservasiController extends Controller
             ], 404);
         }
 
+        $validator = Validator::make($request->all(), [
+            'user_id'       => 'required|integer',
+            'meja_id'       => 'required|integer',
+            'tanggal'       => 'required|date',
+            'jam'           => 'required',
+            'jumlah_tamu'   => 'required|integer',
+            'catatan'       => 'nullable|string',
+            'status'        => 'nullable|integer',
+            'biaya_deposit' => 'nullable|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi Gagal',
+                'data'    => $validator->errors()
+            ], 422);
+        }
+
         $reservasi->update($request->all());
 
         return new PostResource(true, 'Data Reservasi Berhasil Diubah', $reservasi);
@@ -89,7 +108,7 @@ class ReservasiController extends Controller
     /**
      * Menghapus data reservasi
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $reservasi = Reservasi::find($id);
 
