@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->integer('nomor_meja');
             $table->integer('kapasitas');
-            $table->enum('area', ['indoor', 'terrace']);
+            $table->enum('area', ['indoor','outdoor', 'terrace']);
             $table->enum('status', ['tersedia', 'terisi', 'maintenance'])->default('tersedia');
             $table->timestamps();
         });

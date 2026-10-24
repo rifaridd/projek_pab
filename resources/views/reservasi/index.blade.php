@@ -57,9 +57,6 @@
                             
                             <!-- Days 1 to 31 -->
                             <template x-for="day in 31">
-                                @php
-                                    // Pre-populate some disabled/occupied dates just for flavor or keep it simple
-                                @endphp
                                 <button 
                                     type="button"
                                     @click="tanggal = '2026-05-' + String(day).padStart(2, '0')"
@@ -138,18 +135,46 @@
                                             'bg-[#C8882A] border-[#C8882A] text-white shadow-lg scale-105': mejaId == '{{ $meja->id }}'
                                         }"
                                     >
-                                        <!-- Table Number -->
                                         <span class="text-lg font-serif font-black">M{{ $meja->nomor_meja }}</span>
                                         <span class="text-[10px] mt-1 uppercase tracking-wider" :class="mejaId == '{{ $meja->id }}' ? 'text-white/80' : 'text-[#AB9BB0]'">
                                             {{ $meja->kapasitas }} Kursi
                                         </span>
-
-                                        <!-- Chair lines visual decorators -->
                                         <div class="absolute -inset-1 border border-transparent rounded-2xl pointer-events-none flex items-center justify-between px-1">
                                             <div class="w-1.5 h-6 rounded-sm" :class="mejaId == '{{ $meja->id }}' ? 'bg-white/40' : 'bg-[#D4C9BB]'"></div>
                                             <div class="w-1.5 h-6 rounded-sm" :class="mejaId == '{{ $meja->id }}' ? 'bg-white/40' : 'bg-[#D4C9BB]'"></div>
                                         </div>
-                                        
+                                        @if ($meja->status !== 'tersedia')
+                                            <span class="absolute bottom-2 bg-[#E95252] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">TERISI</span>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Area Outdoor -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs uppercase tracking-wider font-bold text-[#7A6A58]">Area Outdoor</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                @foreach ($mejas->where('area', 'outdoor') as $meja)
+                                    <button 
+                                        type="button"
+                                        @if ($meja->status !== 'tersedia') disabled @endif
+                                        @click="selectMeja('{{ $meja->id }}', '{{ $meja->nomor_meja }}', '{{ $meja->area }}', {{ $meja->kapasitas }})"
+                                        class="relative flex flex-col items-center justify-center p-4 border rounded-2xl transition-all duration-150 h-28"
+                                        :class="{
+                                            'bg-[#E95252]/5 border-[#E95252]/20 opacity-60 cursor-not-allowed': '{{ $meja->status }}' !== 'tersedia',
+                                            'bg-white border-[#D4C9BB] hover:border-[#C8882A]': '{{ $meja->status }}' === 'tersedia' && mejaId != '{{ $meja->id }}',
+                                            'bg-[#C8882A] border-[#C8882A] text-white shadow-lg scale-105': mejaId == '{{ $meja->id }}'
+                                        }"
+                                    >
+                                        <span class="text-lg font-serif font-black">M{{ $meja->nomor_meja }}</span>
+                                        <span class="text-[10px] mt-1 uppercase tracking-wider" :class="mejaId == '{{ $meja->id }}' ? 'text-white/80' : 'text-[#AB9BB0]'">
+                                            {{ $meja->kapasitas }} Kursi
+                                        </span>
+                                        <div class="absolute -inset-1 border border-transparent rounded-2xl pointer-events-none flex items-center justify-between px-1">
+                                            <div class="w-1.5 h-6 rounded-sm" :class="mejaId == '{{ $meja->id }}' ? 'bg-white/40' : 'bg-[#D4C9BB]'"></div>
+                                            <div class="w-1.5 h-6 rounded-sm" :class="mejaId == '{{ $meja->id }}' ? 'bg-white/40' : 'bg-[#D4C9BB]'"></div>
+                                        </div>
                                         @if ($meja->status !== 'tersedia')
                                             <span class="absolute bottom-2 bg-[#E95252] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">TERISI</span>
                                         @endif
@@ -159,9 +184,10 @@
                         </div>
 
                         <!-- Area Terrace -->
-                        <div class="space-y-3">
-                            <h4 class="text-xs uppercase tracking-wider font-bold text-[#7A6A58]">Area Terrace</h4>
-                            <div class="grid grid-cols-2 gap-4 max-w-md">
+<!-- Area Terrace -->
+<div class="space-y-3">
+    <h4 class="text-xs uppercase tracking-wider font-bold text-[#7A6A58]">Area Terrace</h4>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 @foreach ($mejas->where('area', 'terrace') as $meja)
                                     <button 
                                         type="button"
@@ -176,9 +202,8 @@
                                     >
                                         <span class="text-lg font-serif font-black">M{{ $meja->nomor_meja }}</span>
                                         <span class="text-[10px] mt-1 uppercase tracking-wider" :class="mejaId == '{{ $meja->id }}' ? 'text-white/80' : 'text-[#AB9BB0]'">
-                                            {{ $meja->kapasitas }} Kursi (Outdoor)
+                                            {{ $meja->kapasitas }} Kursi
                                         </span>
-                                        
                                         @if ($meja->status !== 'tersedia')
                                             <span class="absolute bottom-2 bg-[#E95252] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">TERISI</span>
                                         @endif
@@ -245,7 +270,7 @@
                             </div>
                             <div class="flex justify-between items-center pb-3 border-b border-[#F5F1EB]">
                                 <span class="text-[#7A6A58]">Area / Lokasi</span>
-                                <span class="font-bold text-[#1A1A1A]" x-text="mejaNomor ? 'Meja #' + mejaNomor + ' (' + (mejaArea === 'indoor' ? 'Indoor' : 'Terrace') + ')' : 'Belum dipilih'"></span>
+                                <span class="font-bold text-[#1A1A1A]" x-text="mejaNomor ? 'Meja #' + mejaNomor + ' (' + (mejaArea === 'indoor' ? 'Indoor' : (mejaArea === 'outdoor' ? 'Outdoor' : 'Terrace')) + ')' : 'Belum dipilih'"></span>
                             </div>
                             <div class="flex justify-between items-center pb-3 border-b border-[#F5F1EB]">
                                 <span class="text-[#7A6A58]">Kapasitas Meja</span>
