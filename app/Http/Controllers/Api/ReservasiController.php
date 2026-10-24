@@ -3,34 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Reservasi; 
+use App\Models\Reservasi;
+use App\Http\Resources\PostResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ReservasiController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan semua data reservasi
      */
     public function index()
     {
-        // Mengambil seluruh data reservasi dari database
-        $reservasi = Reservasi::all();
-
-        // Mengembalikan data dalam format JSON standar API
-        return response()->json([
-            'success' => true,
-            'message' => 'List Data Reservasi',
-            'data'    => $reservasi
-        ], 200);
+        $reservasis = Reservasi::all();
+        return new PostResource(true, 'List Data Reservasi', $reservasis);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data reservasi baru
      */
     public function store(Request $request)
     {
-        // 1. Validasi sesuai kolom asli pada Model & Database (status diubah ke integer)
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'user_id'       => 'required|integer',
             'meja_id'       => 'required|integer',
             'tanggal'       => 'required|date',
@@ -41,7 +35,6 @@ class ReservasiController extends Controller
             'biaya_deposit' => 'nullable|numeric',
         ]);
 
-        // Jika validasi gagal, kembalikan response error 422
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -50,38 +43,66 @@ class ReservasiController extends Controller
             ], 422);
         }
 
-        // 2. Simpan data ke database
         $reservasi = Reservasi::create($request->all());
 
-        // 3. Kembalikan response JSON sukses (status 201 Created)
-        return response()->json([
-            'success' => true,
-            'message' => 'Data Reservasi Berhasil Disimpan',
-            'data'    => $reservasi
-        ], 201);
+        return new PostResource(true, 'Data Reservasi Berhasil Disimpan', $reservasi);
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan detail reservasi berdasarkan ID
      */
-    public function show(string $id)
+    public function show($id)
     {
-        // Nanti kita isi untuk detail reservasi
+        $reservasi = Reservasi::find($id);
+
+        if (!$reservasi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data Reservasi Tidak Ditemukan',
+                'data'    => null
+            ], 404);
+        }
+
+        return new PostResource(true, 'Detail Data Reservasi', $reservasi);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Mengubah data reservasi
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        // Nanti kita isi untuk update data
+        $reservasi = Reservasi::find($id);
+
+        if (!$reservasi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data Reservasi Tidak Ditemukan',
+                'data'    => null
+            ], 404);
+        }
+
+        $reservasi->update($request->all());
+
+        return new PostResource(true, 'Data Reservasi Berhasil Diubah', $reservasi);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus data reservasi
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        // Nanti kita isi untuk hapus data
+        $reservasi = Reservasi::find($id);
+
+        if (!$reservasi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data Reservasi Tidak Ditemukan',
+                'data'    => null
+            ], 404);
+        }
+
+        $reservasi->delete();
+
+        return new PostResource(true, 'Data Reservasi Berhasil Dihapus', null);
     }
 }
